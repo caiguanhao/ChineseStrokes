@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -93,24 +95,33 @@ func getChar(charCode int64) (err error) {
 func main() {
 	flag.Parse()
 
-	start, err := strconv.ParseInt(flag.Arg(0), 16, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	end, err := strconv.ParseInt(flag.Arg(1), 16, 64)
-	if err != nil {
-		panic(err)
-	}
-
 	concurrency := 5
 	codes := make(chan int64)
 
 	go func() {
 		defer close(codes)
 
-		for i := start; i <= end; i++ {
-			codes <- i
+		args := flag.Args()
+		if len(args) == 1 {
+			file, err := os.Open(flag.Arg(0))
+			if err == nil {
+				scanner := bufio.NewScanner(file)
+				for scanner.Scan() {
+					code, err := strconv.ParseInt(scanner.Text(), 16, 64)
+					if err == nil {
+						codes <- code
+					}
+				}
+			}
+			file.Close()
+		} else {
+			start, _ := strconv.ParseInt(flag.Arg(0), 16, 64)
+			end, _ := strconv.ParseInt(flag.Arg(1), 16, 64)
+			if start > 0 {
+				for i := start; i <= end; i++ {
+					codes <- i
+				}
+			}
 		}
 	}()
 
