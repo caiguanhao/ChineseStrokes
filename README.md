@@ -58,7 +58,16 @@ grep -h -E '^[0-9]+ [0-9]+$' data/*.txt | sort -n | awk '
 | Python     | `ord(u'永')`         | `unichr(27704)`              |
 | Go         | `[]rune("永")[0]`    | `string(27704)`              |
 
-## Strokes Distribution
+## Statistics
+
+Average:
+
+```
+grep -h -E '^[0-9]+ [0-9]+$' data/*.txt | awk '{total += $2} END{print total/NR}'
+=> 13.961
+```
+
+Distribution:
 
 ```
 grep -h -E '^[0-9]+ [0-9]+$' data/*.txt | sort -k 2 -n | uniq -f 1 -c
